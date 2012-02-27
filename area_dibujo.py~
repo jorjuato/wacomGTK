@@ -1,0 +1,99 @@
+#!/usr/bin/env python
+
+import pygtk
+pygtk.require('2.0')
+import gtk
+import gtk.glade
+import gobject
+import cairo
+import math
+#import sys
+#import os
+
+global gc
+
+class WacomDrawWindow:
+	
+	def __init__(self):
+		
+		global gc
+		gladefile="gtkperiment.glade"
+		windowname="draw_window"
+		self.wTree=gtk.glade.XML (gladefile,windowname)
+		self.MainWindow = self.wTree.get_widget("draw_window")
+		self.DrawingFrame = self.wTree.get_widget("drawingalignment")
+		
+		self.DrawingArea = WacomWidget()
+		self.DrawingArea.show()
+		self.DrawingFrame.add(self.DrawingArea)
+		self.DrawingArea.set_extension_events(gtk.gdk.EXTENSION_EVENTS_ALL)
+		
+		self.Device = 0
+		self.DeviceMode = None
+		self.DeviceName = None
+		
+		gc = self.DrawingArea.window.new_gc()
+		#self.MainWindow.run()
+		#self.MainWindow.hide()
+		
+
+			
+class WacomWidget(gtk.DrawingArea):
+	
+	def __init__(self):
+
+		gtk.DrawingArea.__init__(self)
+
+		self.Device = 0
+		self.Radius = 5.0
+		self.Drawing = False
+		self.WindowSize = None
+		self.oldx = 0
+		self.oldy = 0
+		
+		
+		self.set_events(gtk.gdk.POINTER_MOTION_MASK  | gtk.gdk.BUTTON_MOTION_MASK | gtk.gdk.BUTTON1_MOTION_MASK \
+						| gtk.gdk.BUTTON2_MOTION_MASK | gtk.gdk.BUTTON3_MOTION_MASK | gtk.gdk.BUTTON_PRESS_MASK \
+						| gtk.gdk.BUTTON_RELEASE_MASK)
+		
+		#self.connect("configure-event", self.ConfigureEvent)
+		self.connect("expose-event", self.ExposeEvent)
+		self.connect("motion-notify-event", self.MotionEvent)
+		self.connect("button-press-event", self.ButtonPress)
+		self.connect("button-release-event", self.ButtonRelease)
+		#self.set_size_request(100,100)
+		
+	def ConfigureEvent(self, widget, event):
+		pass		
+
+	def GetPressure(self):
+		dev = gtk.gdk.devices_list()[self.Device]
+		state = dev.get_state(self.window)
+		return dev.get_axis(state[0], gtk.gdk.AXIS_PRESSURE)
+	
+	def MotionEvent(self, widget, event):
+		if self.Drawing:
+			x, y = event.get_coords()
+			p = self.GetPressure()
+			if p == None:
+				p = 0.0
+			r =  p * 50 + 5
+			#colormap = widget.get_colormap()
+			#color = colormap.alloc_color(r, 0, 0, writeable=False, best_match=True)
+			gc.foreground = color
+			self.window.draw_line(gc, self.oldx, self.oldy, x, y)
+			self.oldx = x
+			self.oldy = y
+	
+	def ButtonPress(self, widget, event):
+		self.Drawing = True
+		self.oldx, self.oldy = event.get_coords()
+
+	def ButtonRelease(self, widget, event):
+		self.Drawing = False
+		pass
+
+	def ExposeEvent(self, widget, event):
+		widget.draw()
+		return False
+

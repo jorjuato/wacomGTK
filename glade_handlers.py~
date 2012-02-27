@@ -1,0 +1,131 @@
+#########################################################################	
+#####	CALLBACKS		#################################################
+	
+class MainHandlers:
+######## MAIN WINDOW CALLBACKS
+	def on_delete_event(widget,event):
+		return False
+	
+	def on_destroy(widget):
+   		gtk.main_quit()
+
+######## TOOL BAR CALLBACKS
+	def on_toolbuttonNuevo_clicked(self):
+		pass
+	
+	def on_toolbuttonSalir_clicked(self):
+		gtk.main_quit()	
+
+	def on_toolbuttonAyuda_clicked(self):
+		gladefile="gtkperiment.glade"
+		windowname="aboutdialog"
+		wTree=gtk.glade.XML (gladefile,windowname)
+		return
+		
+######## BUTTONS CALLBACKS	
+	def on_ayuda1_clicked(self):
+		gladefile="gtkperiment.glade"
+		windowname="ayudaHV"
+		wTree=gtk.glade.XML (gladefile,windowname)
+		return
+		
+	def on_ayuda2_clicked(self):
+		gladefile="gtkperiment.glade"
+		windowname="ayudaFlash"
+		wTree=gtk.glade.XML (gladefile,windowname)
+		return
+		
+	def on_ayuda3_clicked(self):
+		gladefile="gtkperiment.glade"
+		windowname="ayudaFitt"
+		wTree=gtk.glade.XML (gladefile,windowname)
+		return
+			
+	def on_ayuda4_clicked(self):
+		gladefile="gtkperiment.glade"
+		windowname="ayudaFeed"
+		wTree=gtk.glade.XML (gladefile,windowname)
+		return
+			
+	def on_iniciar1_clicked(self):
+		wacomDraw = WacomDrawWindow()
+		return
+			
+	def on_iniciar2_clicked(self):
+		import area_dibujo	
+		return
+			
+	def on_iniciar3_clicked(self):
+		import area_dibujo
+		return
+			
+	def on_iniciar4_clicked(self):
+		import area_dibujo
+		return
+
+
+######## TOGGLED CALLBACKS
+	def on_checkbuttonHV_toggled(widget):
+		if widgets['frameHV'].get_property("sensitive") == False:
+			widgets['frameHV'].set_sensitive(True) 
+		else: 
+			widgets['frameHV'].set_sensitive(False)
+	
+	def on_checkbuttonFlash_toggled(widget):
+		if widgets['frameFlash'].get_property("sensitive") == False:
+			widgets['frameFlash'].set_sensitive(True) 
+		else: 
+			widgets['frameFlash'].set_sensitive(False)
+	
+	def on_checkbuttonFitt_toggled(widget):
+		if widgets['frameFitt'].get_property("sensitive") == False:
+			widgets['frameFitt'].set_sensitive(True)
+		else: 
+			widgets['frameFitt'].set_sensitive(False)
+	
+	def on_checkbuttonFeed_toggled(widget):
+		if widgets['frameFeed'].get_property("sensitive") == False:
+			widgets['frameFeed'].set_sensitive(True)
+		else: 
+			widgets['frameFeed'].set_sensitive(False)
+			
+			
+######## DRAWING AREA CALLBACKS
+class DrawHandlers:
+
+	def ConfigureEvent(self, widget, event):
+		pass		
+
+	def GetPressure(self):
+		dev = gtk.gdk.devices_list()[self.Device]
+		state = dev.get_state(self.window)
+		return dev.get_axis(state[0], gtk.gdk.AXIS_PRESSURE)
+	
+	def MotionEvent(self, widget, event):
+		if self.Drawing:
+			x, y = event.get_coords()
+			p = self.GetPressure()
+			if p == None:
+				p = 0.0
+			r =  p * 50 + 5
+			#colormap = widget.get_colormap()
+			#color = colormap.alloc_color(r, 0, 0, writeable=False, best_match=True)
+			#gc.foreground = color
+			self.window.draw_line(gc, self.oldx, self.oldy, x, y)
+			self.oldx = x
+			self.oldy = y
+	
+	def ButtonPress(self, widget, event):
+		self.Drawing = True
+		self.oldx, self.oldy = event.get_coords()
+
+	def ButtonRelease(self, widget, event):
+		self.Drawing = False
+		pass
+
+	def ExposeEvent(self, widget, event):
+		widget.draw()
+		return False
+
+
+
